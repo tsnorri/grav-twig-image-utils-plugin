@@ -39,7 +39,10 @@ class ImageProxy
 		
 		if ($this->sizesRules)
 		{
-			if ($el['attributes']['sizes'])
+			if (!array_key_exists('attributes', $el))
+				$el['attributes'] = [];
+			
+			if (array_key_exists('sizes', $el['attributes']))
 				$el['attributes']['sizes'] = $this->sizesRules . ", " . $el['attributes']['sizes'];
 			else
 				$el['attributes']['sizes'] = $this->sizesRules;
