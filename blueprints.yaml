@@ -1,0 +1,26 @@
+name: Twig Image Utils
+version: 0.1.0
+description: Twig functions for image handling
+icon: plug
+author:
+  name: Tuukka Norri
+  email: tsnorri@iki.fi
+homepage: https://github.com/tsnorri/grav-plugin-twig-image-utils
+keywords: grav, plugin, twig, image, image-set
+bugs: https://github.com/tsnorri/grav-plugin-twig-image-utils/issues
+docs: https://github.com/tsnorri/grav-plugin-twig-image-utils/blob/master/README.md
+license: MIT
+
+form:
+  validation: strict
+  fields:
+    enabled:
+      type: toggle
+      label: Plugin status
+      highlight: 1
+      default: 0
+      options:
+        1: Enabled
+        0: Disabled
+      validate:
+        type: bool
