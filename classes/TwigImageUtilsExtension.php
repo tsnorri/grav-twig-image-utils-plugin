@@ -88,7 +88,7 @@ class TwigImageUtilsExtension extends \Twig_Extension
 			
 			
 			// Return an image proxy with the given minimum size as the default derivative.
-			'image_with_default' => new \Twig_SimpleFilter('image_with_default', function ($image, $maxSize, $axis) {
+			'image_with_default' => new \Twig_SimpleFilter('image_with_default', function ($image, $maxSize, $axis, $useDataAttributes = false) {
 				
 				if (is_null($image))
 					return NULL;
@@ -102,7 +102,7 @@ class TwigImageUtilsExtension extends \Twig_Extension
 				$dimensions = $this->mediumMaximumSize($image);
 				$mwsr = $this->maxWidthSizeRule($dimensions);
 				
-				return new ImageProxy($image, $defaultMedium, $mwsr, $dimensions);
+				return new ImageProxy($image, $defaultMedium, $mwsr, $dimensions, $useDataAttributes);
 			}),
 			
 			

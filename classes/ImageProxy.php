@@ -14,14 +14,16 @@ class ImageProxy
 	protected $sizesRules = null;
 	protected $dimensions = null;
 	protected $parsedown = null;
+	protected $useDataAttributes = false;
 	
 	
-	function __construct($image, $defaultMedium, $sizesRules, $dimensions)
+	function __construct($image, $defaultMedium, $sizesRules, $dimensions, $useDataAttributes)
 	{
 		$this->image = $image;
 		$this->defaultMedium = $defaultMedium;
 		$this->sizesRules = $sizesRules;
 		$this->dimensions = $dimensions;
+		$this->useDataAttributes = $useDataAttributes;
 	}
 	
 	
@@ -34,29 +36,47 @@ class ImageProxy
 	*/
 	
 	
-	// Update src and sizes.
+	// Replace src, srcset and sizes with data attributes in order
+	// to update the default size in JavaScript.
 	protected function updateAttributes(&$el)
 	{
-		$el['attributes']['src'] = $this->defaultMedium->url(false);
+		if (!array_key_exists('attributes', $el))
+			$el['attributes'] = [];
+		
+		if ($this->useDataAttributes)
+		{
+			$el['attributes']['data-src'] = $this->defaultMedium->url(false);
+			if (array_key_exists('srcset', $el['attributes']))
+				$el['attributes']['data-srcset'] = $el['attributes']['srcset'];
+		}
+		else
+		{
+			$el['attributes']['src'] = $this->defaultMedium->url(false);
+		}
 		
 		if ($this->sizesRules)
 		{
-			if (!array_key_exists('attributes', $el))
-				$el['attributes'] = [];
+			$attrName = "sizes";
+			if ($this->useDataAttributes)
+				$attrName = "data-sizes";
 			
 			if (array_key_exists('sizes', $el['attributes']))
-				$el['attributes']['sizes'] = $this->sizesRules . ", " . $el['attributes']['sizes'];
+				$el['attributes'][$attrName] = $this->sizesRules . ", " . $el['attributes']['sizes'];
 			else
-				$el['attributes']['sizes'] = $this->sizesRules;
+				$el['attributes'][$attrName] = $this->sizesRules;
 		}
 
 		if ($this->dimensions)
 		{
-			if (!array_key_exists('attributes', $el))
-				$el['attributes'] = [];
-
 			$el['attributes']['data-width'] = $this->dimensions[0];
 			$el['attributes']['data-height'] = $this->dimensions[1];
+		}
+		
+		if ($this->useDataAttributes)
+		{
+			unset($el['attributes']['src']);
+			unset($el['attributes']['srcset']);
+			unset($el['attributes']['sizes']);
 		}
 	}
 	
