@@ -12,8 +12,8 @@ require_once(__DIR__ . '/ImageProxy.php');
 
 class TwigImageUtilsExtension extends \Twig_Extension
 {
-	// Generate a rule for img's sizes attribute s.t. the image will not be scaled bigger than its pixel dimensions.
-	protected function maxWidthSizeRule($image)
+	// Find the size of the maximum-sized-medium assuming that the aspect ratio is constant.
+	protected function mediumMaximumSize($image)
 	{
 		if (is_null($image))
 			return NULL;
@@ -22,18 +22,29 @@ class TwigImageUtilsExtension extends \Twig_Extension
 		$alternatives = Accessor::property($image, "alternatives");
 		
 		$maxWidth = $image->get('width');
+		$maxHeight = $image->get('height');
 		foreach ($alternatives as $ratio => $medium)
 		{
 			$width = $medium->get('width');
 			if ($maxWidth < $width)
+			{
 				$maxWidth = $width;
+				$maxHeight = $medium->get('height');
+			}
 		}
-		
-		// Viewport minimum width.
-		return sprintf("(min-width: %dpx) %dpx", $maxWidth, $maxWidth);
+
+		return [$maxWidth, $maxHeight];
 	}
-	
-	
+
+
+	// Generate a rule for img's sizes attribute s.t. the image will not be scaled bigger than its pixel dimensions.
+	protected function maxWidthSizeRule($dimensions)
+	{
+		// Viewport minimum width.
+		return sprintf("(min-width: %dpx) %dpx", $dimensions[0], $dimensions[0]);
+	}
+
+
 	// Return the medium the size of which on the given axis is at most maxSize.
 	protected function mediumWithMaximumSize($image, $alternatives, $maxSize, $axis)
 	{
@@ -71,7 +82,8 @@ class TwigImageUtilsExtension extends \Twig_Extension
 			// Return a rule for the sizes attribute that restricts the width of the image to its maximum size.
 			'max_width_size_rule' => new \Twig_SimpleFilter('max_width_size_rule', function ($image) {
 				
-				return $this->maxWidthSizeRule($image);
+				$dimensions = $this->mediumMaximumSize($image);
+				return $this->maxWidthSizeRule($dimensions);
 			}),
 			
 			
@@ -87,9 +99,10 @@ class TwigImageUtilsExtension extends \Twig_Extension
 				$defaultMedium = $this->mediumWithMaximumSize($image, $alternatives, $maxSize, $axis);
 				
 				// Maximum size.
-				$mwsr = $this->maxWidthSizeRule($image);
+				$dimensions = $this->mediumMaximumSize($image);
+				$mwsr = $this->maxWidthSizeRule($dimensions);
 				
-				return new ImageProxy($image, $defaultMedium, $mwsr);
+				return new ImageProxy($image, $defaultMedium, $mwsr, $dimensions);
 			}),
 			
 			

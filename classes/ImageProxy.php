@@ -12,14 +12,16 @@ class ImageProxy
 	protected $image = null;
 	protected $defaultMedium = null;
 	protected $sizesRules = null;
+	protected $dimensions = null;
 	protected $parsedown = null;
 	
 	
-	function __construct($image, $defaultMedium, $sizesRules)
+	function __construct($image, $defaultMedium, $sizesRules, $dimensions)
 	{
 		$this->image = $image;
 		$this->defaultMedium = $defaultMedium;
 		$this->sizesRules = $sizesRules;
+		$this->dimensions = $dimensions;
 	}
 	
 	
@@ -46,6 +48,15 @@ class ImageProxy
 				$el['attributes']['sizes'] = $this->sizesRules . ", " . $el['attributes']['sizes'];
 			else
 				$el['attributes']['sizes'] = $this->sizesRules;
+		}
+
+		if ($this->dimensions)
+		{
+			if (!array_key_exists('attributes', $el))
+				$el['attributes'] = [];
+
+			$el['attributes']['data-width'] = $this->dimensions[0];
+			$el['attributes']['data-height'] = $this->dimensions[1];
 		}
 	}
 	
